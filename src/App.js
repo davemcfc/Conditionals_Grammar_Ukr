@@ -2,14 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-// Wrapped in a try-catch to prevent the Canvas preview from crashing, whilst maintaining Vercel compatibility.
-let safeApiKey = "";
-try {
-  safeApiKey = process.env.REACT_APP_GEMINI_API_KEY;
-} catch (error) {
-  // Safely ignores the 'process is not defined' error in the browser/preview.
-}
-const apiKey = safeApiKey;
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
@@ -172,13 +165,13 @@ const content = {
           "If I were rich, I would have bought that coat. (Present condition, past result)"
         ],
         nuances: [
-          { title: "Time vs. Tense", text: "A key idea to remember is not to confuse verb tense with time. For example, in the sentence 'If I were rich', you are using the past simple tense, but you are actually talking about an imaginary situation in the present." },
-          { title: "\"Were\" vs \"Was\"", text: "When making a mixed conditional that uses a present condition with a past result, apply the same rule as the second conditional. It is widely considered more formally correct to use 'were' for all subjects instead of 'was'." }
+          { title: "Time vs. Tense", text: "Не плутайте час дієслова (tense) з реальним часом (time). Наприклад, у реченні 'If I were rich' ви використовуєте Past Simple, але насправді говорите про уявну ситуацію в теперішньому." },
+          { title: "\"Were\" проти \"Was\"", text: "Коли ви поєднуєте теперішню умову з минулим результатом, застосовуйте правило другого типу: формально правильніше використовувати 'were' для всіх осіб." }
         ],
         qa: [
-          { q: "What is the primary purpose of a mixed conditional?", a: "It is used to mix two different time periods in one sentence, such as an imaginary past situation that has a hypothetical present result." },
-          { q: "In the sentence 'If I were rich, I would have bought that coat', what time period does the 'if' clause refer to?", a: "It refers to an unreal or hypothetical situation in the present, even though it uses the past simple tense." },
-          { q: "True or False: You can only mix past conditions with present results.", a: "False. While that is a very common combination, you can also mix present conditions with past results, as well as several other time combinations." }
+          { q: "Яка основна мета змішаних умовних речень?", a: "Вони використовуються для поєднання двох різних часових періодів в одному реченні, наприклад, уявної минулої ситуації, яка має гіпотетичний теперішній результат." },
+          { q: "В реченні 'If I were rich, I would have bought that coat', до якого часу відноситься частина з 'if'?", a: "Вона відноситься до нереальної або гіпотетичної ситуації в теперішньому часі, незважаючи на те, що використовується час Past Simple." },
+          { q: "Правда чи брехня: ви можете змішувати лише минулі умови з теперішніми результатами?", a: "Брехня. Хоча це дуже поширена комбінація, ви також можете змішувати теперішні умови з минулими результатами, а також використовувати кілька інших часових комбінацій." }
         ],
         staticExercises: [
           { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Past condition (didn't listen), present result (in a mess).", typeIndex: 4 },
