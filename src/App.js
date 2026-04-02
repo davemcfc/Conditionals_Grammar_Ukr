@@ -367,11 +367,11 @@ const content = {
 
 // --- Theme Helper ---
 const themeStyles = {
-  blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', header: 'bg-blue-100', button: 'bg-blue-600 hover:bg-blue-700', activeTab: 'bg-blue-600 text-white shadow-md', inactiveTab: 'bg-white text-blue-700 hover:bg-blue-50' },
-  green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', header: 'bg-green-100', button: 'bg-green-600 hover:bg-green-700', activeTab: 'bg-green-600 text-white shadow-md', inactiveTab: 'bg-white text-green-700 hover:bg-blue-50' },
-  purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', header: 'bg-purple-100', button: 'bg-purple-600 hover:bg-purple-700', activeTab: 'bg-purple-600 text-white shadow-md', inactiveTab: 'bg-white text-purple-700 hover:bg-blue-50' },
-  red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', header: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700', activeTab: 'bg-red-600 text-white shadow-md', inactiveTab: 'bg-white text-red-700 hover:bg-blue-50' },
-  orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', header: 'bg-orange-100', button: 'bg-orange-600 hover:bg-orange-700', activeTab: 'bg-orange-600 text-white shadow-md', inactiveTab: 'bg-white text-orange-700 hover:bg-blue-50' }
+  blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', header: 'bg-blue-100', button: 'bg-blue-600 hover:bg-blue-700', activeTab: 'bg-blue-600 text-white shadow-md', inactiveTab: 'bg-white text-blue-700 hover:bg-blue-50', bullet: 'bg-blue-500' },
+  green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', header: 'bg-green-100', button: 'bg-green-600 hover:bg-green-700', activeTab: 'bg-green-600 text-white shadow-md', inactiveTab: 'bg-white text-green-700 hover:bg-blue-50', bullet: 'bg-green-500' },
+  purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', header: 'bg-purple-100', button: 'bg-purple-600 hover:bg-purple-700', activeTab: 'bg-purple-600 text-white shadow-md', inactiveTab: 'bg-white text-purple-700 hover:bg-blue-50', bullet: 'bg-purple-500' },
+  red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', header: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700', activeTab: 'bg-red-600 text-white shadow-md', inactiveTab: 'bg-white text-red-700 hover:bg-blue-50', bullet: 'bg-red-500' },
+  orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', header: 'bg-orange-100', button: 'bg-orange-600 hover:bg-orange-700', activeTab: 'bg-orange-600 text-white shadow-md', inactiveTab: 'bg-white text-orange-700 hover:bg-blue-50', bullet: 'bg-orange-500' }
 };
 
 const typeIndexMap = ["Type 0: Zero Conditional", "Type 1: First Conditional", "Type 2: Second Conditional", "Type 3: Third Conditional", "Mixed Conditional"];
@@ -753,7 +753,7 @@ export default function App() {
         latestMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }
-  }, [grammarChat, grammarLoading, activeMainTab]);
+  }, [grammarChat, activeMainTab]);
 
   const t = content[lang];
   const activeTheoryData = t.types.find(type => type.id === activeTheoryTab);
@@ -810,7 +810,7 @@ export default function App() {
     setGrammarLoading(false);
   };
 
-  const handleCopy = (text, index) => {
+  const handleCopy = async (text, index) => {
     // Strip markdown formatting for a clean plain-text copy
     const cleanText = text
       .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '$1') // Remove bold italic
@@ -820,7 +820,18 @@ export default function App() {
       .replace(/^(#{1,6})\s+(.*)/gm, '$2') // Remove heading hashes
       .replace(/\*/g, ''); // The Nuclear Option: eradicate all remaining stray asterisks
 
-    // Create a temporary hidden textarea to robustly execute the copy command
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(cleanText);
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
+        return; // Exit early if successful
+      }
+    } catch (err) {
+      console.warn('Modern clipboard API failed, using fallback', err);
+    }
+
+    // Fallback for older browsers or restricted environments
     const textArea = document.createElement("textarea");
     textArea.value = cleanText;
     textArea.style.position = "absolute";
@@ -833,7 +844,7 @@ export default function App() {
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
-      console.error('Copy failed', err);
+      console.error('Fallback copy failed', err);
     }
     
     document.body.removeChild(textArea);
@@ -940,7 +951,7 @@ export default function App() {
                   <ul className="space-y-3">
                     {activeTheoryData.examples.map((ex, i) => (
                       <li key={i} className="flex items-start gap-3 text-gray-800 bg-white/40 p-3 rounded-lg border border-black/5">
-                        <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 bg-${activeTheoryData.colorTheme}-500 shadow-sm`} />
+                        <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${theme.bullet} shadow-sm`} />
                         <span className="font-medium text-[1.05rem]">{ex}</span>
                       </li>
                     ))}
