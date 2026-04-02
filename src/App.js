@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-// For Create React App: set REACT_APP_GEMINI_API_KEY in your .env file and in Vercel's Environment Variables dashboard.
-// For Vite: use VITE_GEMINI_API_KEY and access it via import.meta.env.VITE_GEMINI_API_KEY instead.
-const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY; 
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
@@ -167,7 +165,7 @@ const content = {
           "If I were rich, I would have bought that coat. (Present condition, past result)"
         ],
         nuances: [
-          { title: "Time vs. Tense", text: "A key idea to remember is not to confuse verb tense with time. For example, in the sentence 'If I were rich', you are using the past simple tense, but you are actually talking about an imaginary situation in the present." },
+          { title: "Time vs. Tense", text: "Не плутайте час дієслова (tense) з реальним часом (time). Наприклад, у реченні 'If I were rich' ви використовуєте Past Simple, але насправді говорите про уявну ситуацію в теперішньому." },
           { title: "\"Were\" vs \"Was\"", text: "When making a mixed conditional that uses a present condition with a past result, apply the same rule as the second conditional. It is widely considered more formally correct to use 'were' for all subjects instead of 'was'." }
         ],
         qa: [
@@ -321,7 +319,7 @@ const content = {
         ],
         qa: [
           { q: "Чи описує третій тип ситуацію, яка відбулася насправді?", a: "Ні, він використовується для розповіді про ситуацію, яка не відбулася в минулому, що дозволяє нам уявити результати цього нереального сценарію." },
-          { q: "Чому мовці часто використовують скорочення на кшталт 'I'д' та 'would've'?", a: "Використання скорочень допомагає з вимовою, завдяки чому складна граматична структура звучить набагато природніше в розмовній англійській." }
+          { q: "Чому мовці часто використовують скорочення на кшталт 'I’д' та 'would’ve'?", a: "Використання скорочень допомагає з вимовою, завдяки чому складна граматична структура звучить набагато природніше в розмовній англійській." }
         ],
         staticExercises: [
           { question: "If I ___ (know) you were coming, I ___ (bake) a cake.", answer: "If I had known you were coming, I would have baked a cake.", explanation: "Втрачена можливість у минулому.", typeIndex: 3 },
@@ -366,23 +364,11 @@ const content = {
 
 // --- Theme Helper ---
 const themeStyles = {
-  blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', header: 'bg-blue-100', button: 'bg-blue-600 hover:bg-blue-700', activeTab: 'bg-blue-600 text-white shadow-md', inactiveTab: 'bg-white text-blue-700 hover:bg-blue-50' },
-  green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', header: 'bg-green-100', button: 'bg-green-600 hover:bg-green-700', activeTab: 'bg-green-600 text-white shadow-md', inactiveTab: 'bg-white text-green-700 hover:bg-blue-50' },
-  purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', header: 'bg-purple-100', button: 'bg-purple-600 hover:bg-purple-700', activeTab: 'bg-purple-600 text-white shadow-md', inactiveTab: 'bg-white text-purple-700 hover:bg-blue-50' },
-  red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', header: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700', activeTab: 'bg-red-600 text-white shadow-md', inactiveTab: 'bg-white text-red-700 hover:bg-blue-50' },
-  orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', header: 'bg-orange-100', button: 'bg-orange-600 hover:bg-orange-700', activeTab: 'bg-orange-600 text-white shadow-md', inactiveTab: 'bg-white text-orange-700 hover:bg-blue-50' }
-};
-
-// FIX 1: Static lookup map for coloured bullet dots.
-// Tailwind's build step only includes classes it can find as literal strings in source files.
-// Dynamically constructed class names like `bg-${color}-500` are invisible to it and get
-// purged from the production bundle. This map uses explicit strings that Tailwind can detect.
-const colorDotMap = {
-  blue: 'bg-blue-500',
-  green: 'bg-green-500',
-  purple: 'bg-purple-500',
-  red: 'bg-red-500',
-  orange: 'bg-orange-500',
+  blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', header: 'bg-blue-100', button: 'bg-blue-600 hover:bg-blue-700', activeTab: 'bg-blue-600 text-white shadow-md', inactiveTab: 'bg-white text-blue-700 hover:bg-blue-50', bullet: 'bg-blue-500' },
+  green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', header: 'bg-green-100', button: 'bg-green-600 hover:bg-green-700', activeTab: 'bg-green-600 text-white shadow-md', inactiveTab: 'bg-white text-green-700 hover:bg-blue-50', bullet: 'bg-green-500' },
+  purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', header: 'bg-purple-100', button: 'bg-purple-600 hover:bg-purple-700', activeTab: 'bg-purple-600 text-white shadow-md', inactiveTab: 'bg-white text-purple-700 hover:bg-blue-50', bullet: 'bg-purple-500' },
+  red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', header: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700', activeTab: 'bg-red-600 text-white shadow-md', inactiveTab: 'bg-white text-red-700 hover:bg-blue-50', bullet: 'bg-red-500' },
+  orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', header: 'bg-orange-100', button: 'bg-orange-600 hover:bg-orange-700', activeTab: 'bg-orange-600 text-white shadow-md', inactiveTab: 'bg-white text-orange-700 hover:bg-blue-50', bullet: 'bg-orange-500' }
 };
 
 const typeIndexMap = ["Type 0: Zero Conditional", "Type 1: First Conditional", "Type 2: Second Conditional", "Type 3: Third Conditional", "Mixed Conditional"];
@@ -764,7 +750,7 @@ export default function App() {
         latestMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }
-  }, [grammarChat, grammarLoading, activeMainTab]);
+  }, [grammarChat, activeMainTab]);
 
   const t = content[lang];
   const activeTheoryData = t.types.find(type => type.id === activeTheoryTab);
@@ -821,25 +807,44 @@ export default function App() {
     setGrammarLoading(false);
   };
 
-  // FIX 2: Replaced deprecated document.execCommand('copy') with the modern
-  // navigator.clipboard API. The function is now async to support the Promise-based API.
   const handleCopy = async (text, index) => {
     // Strip markdown formatting for a clean plain-text copy
     const cleanText = text
       .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '$1') // Remove bold italic
-      .replace(/\*\*([\s\S]+?)\*\*/g, '$1')      // Remove bold
-      .replace(/\*([\s\S]+?)\*/g, '$1')           // Remove italic
-      .replace(/`([\s\S]+?)`/g, '$1')             // Remove code syntax
-      .replace(/^(#{1,6})\s+(.*)/gm, '$2')        // Remove heading hashes
-      .replace(/\*/g, '');                         // Eradicate all remaining stray asterisks
+      .replace(/\*\*([\s\S]+?)\*\*/g, '$1') // Remove bold
+      .replace(/\*([\s\S]+?)\*/g, '$1') // Remove italic
+      .replace(/`([\s\S]+?)`/g, '$1') // Remove code syntax
+      .replace(/^(#{1,6})\s+(.*)/gm, '$2') // Remove heading hashes
+      .replace(/\*/g, ''); // The Nuclear Option: eradicate all remaining stray asterisks
 
     try {
-      await navigator.clipboard.writeText(cleanText);
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(cleanText);
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
+        return; // Exit early if successful
+      }
+    } catch (err) {
+      console.warn('Modern clipboard API failed, using fallback', err);
+    }
+
+    // Fallback for older browsers or restricted environments
+    const textArea = document.createElement("textarea");
+    textArea.value = cleanText;
+    textArea.style.position = "absolute";
+    textArea.style.left = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
-      console.error('Copy failed', err);
+      console.error('Fallback copy failed', err);
     }
+    
+    document.body.removeChild(textArea);
   };
 
   // Group the chat into Q&A pairs (Chronological order)
@@ -943,10 +948,7 @@ export default function App() {
                   <ul className="space-y-3">
                     {activeTheoryData.examples.map((ex, i) => (
                       <li key={i} className="flex items-start gap-3 text-gray-800 bg-white/40 p-3 rounded-lg border border-black/5">
-                        {/* FIX 3: Replaced dynamic class `bg-${colorTheme}-500` with a static
-                            lookup from colorDotMap. Dynamic class names are purged by Tailwind's
-                            build step and would render as colourless dots in production. */}
-                        <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 shadow-sm ${colorDotMap[activeTheoryData.colorTheme]}`} />
+                        <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${theme.bullet} shadow-sm`} />
                         <span className="font-medium text-[1.05rem]">{ex}</span>
                       </li>
                     ))}
