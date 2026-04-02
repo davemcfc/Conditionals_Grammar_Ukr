@@ -2,7 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+// Wrapped in a try-catch to prevent the Canvas preview from crashing, whilst maintaining Vercel compatibility.
+let safeApiKey = "";
+try {
+  safeApiKey = process.env.REACT_APP_GEMINI_API_KEY;
+} catch (error) {
+  // Safely ignores the 'process is not defined' error in the browser/preview.
+}
+const apiKey = safeApiKey;
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
@@ -165,7 +172,7 @@ const content = {
           "If I were rich, I would have bought that coat. (Present condition, past result)"
         ],
         nuances: [
-          { title: "Time vs. Tense", text: "Не плутайте час дієслова (tense) з реальним часом (time). Наприклад, у реченні 'If I were rich' ви використовуєте Past Simple, але насправді говорите про уявну ситуацію в теперішньому." },
+          { title: "Time vs. Tense", text: "A key idea to remember is not to confuse verb tense with time. For example, in the sentence 'If I were rich', you are using the past simple tense, but you are actually talking about an imaginary situation in the present." },
           { title: "\"Were\" vs \"Was\"", text: "When making a mixed conditional that uses a present condition with a past result, apply the same rule as the second conditional. It is widely considered more formally correct to use 'were' for all subjects instead of 'was'." }
         ],
         qa: [
