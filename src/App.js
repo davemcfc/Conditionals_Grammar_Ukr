@@ -1195,7 +1195,6 @@ export default function App() {
                       </div>
                     );
                   })}
-                  <div ref={chatEndRef} />
                 </div>
 
                 <div className="p-4 sm:p-5 bg-white border-t border-slate-200 shadow-sm z-10 shrink-0">
