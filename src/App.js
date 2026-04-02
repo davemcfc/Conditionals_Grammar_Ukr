@@ -4,6 +4,10 @@ import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTria
 // --- API Configuration ---
 const apiKey = process.env.REACT_APP_GEMINI_API_KEY; 
 
+if (!apiKey) {
+  console.error("CRITICAL WARNING: REACT_APP_GEMINI_API_KEY is missing or empty! Check Vercel settings.");
+}
+
 // --- Content Dictionary (EN/UA) ---
 const content = {
   en: {
@@ -376,7 +380,7 @@ const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "tex
 
 // --- API Service ---
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const typeInstruction = specificType === null 
     ? "Generate a random mix of all 5 types (Zero, First, Second, Third, Mixed)." 
@@ -419,18 +423,25 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
         body: JSON.stringify(payload)
       });
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Gemini API Error (${response.status}):`, errorText);
+        // Stop immediately if it's an authentication or client error (no retries)
+        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          throw new Error(`Fatal API Error: ${response.status}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
       const data = await response.json();
       let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (!text) throw new Error("Empty response from Gemini");
       
-      // Clean up any potential markdown formatting from the response
       text = text.replace(/```(json)?\n?/g, '').replace(/```\n?/g, '').trim();
-      
       return JSON.parse(text);
     } catch (error) {
+      if (error.message.includes("Fatal API Error")) throw error; // Break loop instantly
       if (i === delays.length - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delays[i]));
     }
@@ -438,7 +449,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
 };
 
 const askGrammarianFromGemini = async (query, history, lang) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const systemPrompt = `Role: You are an expert grammarian. Answer all questions in the context of British English. All responses should be in British English and follow British English Conventions (colour, theatre, centre, Mr, Mrs, Dr etc.). Where British and American grammar differ, tell the questioner that American English differs and offer to explain the difference. You must always provide initial explanations with reference to British English and grammar. If the user asks in Ukrainian or the current target language is Ukrainian, respond and explain in Ukrainian, but strictly reference English grammar rules and provide English examples.
 
@@ -450,13 +461,11 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
 5. DO NOT output nested asterisks (e.g., **Sentence: **word****).
 6. DO NOT use single asterisks (*) or triple asterisks (***). Use ONLY double asterisks (**) for the targeted grammar words.`;
 
-  // Map local history to Gemini's expected conversational format
   const contents = history.map(msg => ({
     role: msg.role === 'user' ? 'user' : 'model',
     parts: [{ text: msg.text }]
   }));
   
-  // Append current query
   contents.push({ role: 'user', parts: [{ text: query }] });
 
   const payload = {
@@ -474,7 +483,15 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
         body: JSON.stringify(payload)
       });
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Gemini API Error (${response.status}):`, errorText);
+        // Stop immediately if it's an authentication or client error (no retries)
+        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          throw new Error(`Fatal API Error: ${response.status}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -483,6 +500,7 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
       
       return text;
     } catch (error) {
+      if (error.message.includes("Fatal API Error")) throw error; // Break loop instantly
       if (i === delays.length - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delays[i]));
     }
