@@ -5,7 +5,7 @@ import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTria
 let apiKey = "";
 try {
   // Vercel's Webpack statically injects the key here during the build.
-  apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+  apiKey = AIzaSyDmW_LaKq-HnNanso7vP7tX6rM7NEUFAZo;
 } catch (error) {
   // This populated catch block safely ignores the ReferenceError in the Canvas preview,
   // whilst avoiding the 'no-empty' ESLint error that causes Vercel deployments to crash.
