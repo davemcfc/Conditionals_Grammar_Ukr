@@ -2,12 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-// Bypassing Vercel's environment variables to guarantee the connection works.
-const apiKey = "PASTE_YOUR_API_KEY_HERE"; 
-
-if (!apiKey || apiKey === "PASTE_YOUR_API_KEY_HERE") {
-  console.error("CRITICAL WARNING: API Key is missing! Please paste it into Line 6.");
-}
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
@@ -171,7 +166,7 @@ const content = {
         ],
         nuances: [
           { title: "Time vs. Tense", text: "Не плутайте час дієслова (tense) з реальним часом (time). Наприклад, у реченні 'If I were rich' ви використовуєте Past Simple, але насправді говорите про уявну ситуацію в теперішньому." },
-          { title: "\"Were\" проти \"Was\"", text: "When making a mixed conditional that uses a present condition with a past result, apply the same rule as the second conditional. It is widely considered more formally correct to use 'were' for all subjects instead of 'was'." }
+          { title: "\"Were\" vs \"Was\"", text: "When making a mixed conditional that uses a present condition with a past result, apply the same rule as the second conditional. It is widely considered more formally correct to use 'were' for all subjects instead of 'was'." }
         ],
         qa: [
           { q: "What is the primary purpose of a mixed conditional?", a: "It is used to mix two different time periods in one sentence, such as an imaginary past situation that has a hypothetical present result." },
@@ -439,7 +434,9 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
       
       if (!text) throw new Error("Empty response from Gemini");
       
+      // Clean up any potential markdown formatting from the response
       text = text.replace(/```(json)?\n?/g, '').replace(/```\n?/g, '').trim();
+      
       return JSON.parse(text);
     } catch (error) {
       if (error.message.includes("Fatal API Error")) throw error; // Break loop instantly
