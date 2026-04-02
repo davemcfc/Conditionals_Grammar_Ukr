@@ -2,15 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-let apiKey = "";
-try {
-  // Vercel's Webpack statically injects the key here during the build.
-  apiKey = process.env.REACT_APP_GEMINI_API_KEY;
-} catch (error) {
-  // This populated catch block safely ignores the ReferenceError in the Canvas preview,
-  // whilst avoiding the 'no-empty' ESLint error that causes Vercel deployments to crash.
-  apiKey = ""; 
-}
+const apiKey = AIzaSyDmW_LaKq-HnNanso7vP7tX6rM7NEUFAZo; 
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
@@ -412,8 +404,8 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
     }
   `;
 
-  if (!apiKey) {
-    throw new Error("API Key is missing! Please set REACT_APP_GEMINI_API_KEY in Vercel.");
+  if (!apiKey || apiKey === "PASTE_YOUR_API_KEY_HERE") {
+    throw new Error("API Key is missing! Please paste it into Line 5 of App.js.");
   }
 
   const payload = {
@@ -451,7 +443,9 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
       
       if (!text) throw new Error("Empty response from Gemini");
       
+      // Clean up any potential markdown formatting from the response
       text = text.replace(/```(json)?\n?/g, '').replace(/```\n?/g, '').trim();
+      
       return JSON.parse(text);
     } catch (error) {
       if (error.message.includes("Fatal")) throw error;
@@ -474,8 +468,8 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
 5. DO NOT output nested asterisks (e.g., **Sentence: **word****).
 6. DO NOT use single asterisks (*) or triple asterisks (***). Use double asterisks (**) for targeted grammar words.`;
 
-  if (!apiKey) {
-    throw new Error("API Key is missing! Please set REACT_APP_GEMINI_API_KEY in Vercel.");
+  if (!apiKey || apiKey === "PASTE_YOUR_API_KEY_HERE") {
+    throw new Error("API Key is missing! Please paste it into Line 5 of App.js.");
   }
 
   const contents = history.map(msg => ({
