@@ -1,20 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
-// --- API Configuration ---
-// Safe extraction that prevents the Canvas preview from crashing, whilst allowing Vercel to inject the key at build time.
-const getApiKey = () => {
-  try {
-    if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_GEMINI_API_KEY) {
-      return process.env.REACT_APP_GEMINI_API_KEY;
-    }
-  } catch (e) {
-    // Ignore process reference errors in non-Node environments (like the Canvas preview)
-  }
-  return "";
-};
+// --- Prevent Canvas Preview Crash ---
+// This tiny polyfill tricks the browser preview into safely ignoring the "process is not defined" error, 
+// while perfectly preserving Vercel's ability to inject the real API key.
+if (typeof window !== 'undefined' && typeof window.process === 'undefined') {
+  window.process = { env: {} };
+}
 
-const apiKey = getApiKey();
+// --- API Configuration ---
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
@@ -416,10 +411,6 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
     }
   `;
 
-  if (!apiKey) {
-    throw new Error("API Key is missing! Please set REACT_APP_GEMINI_API_KEY in Vercel.");
-  }
-
   const payload = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { responseMimeType: "application/json" }
@@ -477,10 +468,6 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
 4. Use **bold** ONLY for the specific grammar words you are highlighting inside a sentence (e.g., "I do not know **whether** to go").
 5. DO NOT output nested asterisks (e.g., **Sentence: **word****).
 6. DO NOT use single asterisks (*) or triple asterisks (***). Use double asterisks (**) for targeted grammar words.`;
-
-  if (!apiKey) {
-    throw new Error("API Key is missing! Please set REACT_APP_GEMINI_API_KEY in Vercel.");
-  }
 
   const contents = history.map(msg => ({
     role: msg.role === 'user' ? 'user' : 'model',
@@ -1163,12 +1150,6 @@ export default function App() {
                       <span className="hidden sm:inline">{t.askButton}</span>
                     </button>
                   </form>
-                  {grammarError && (
-                    <div className="mt-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-2 text-sm font-medium animate-in fade-in">
-                      <AlertTriangle className="w-4 h-4 flex-shrink-0" /> 
-                      {typeof grammarError === 'string' ? grammarError : t.error}
-                    </div>
-                  )}
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center text-slate-400 opacity-60 p-6 text-center">
                   <Bot className="w-12 h-12 sm:w-16 sm:h-16 mb-4" />
