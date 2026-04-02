@@ -2,7 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+// Safe extraction that prevents the Canvas preview from crashing, whilst allowing Vercel to inject the key at build time.
+const getApiKey = () => {
+  try {
+    if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_GEMINI_API_KEY) {
+      return process.env.REACT_APP_GEMINI_API_KEY;
+    }
+  } catch (e) {
+    // Ignore process reference errors in non-Node environments (like the Canvas preview)
+  }
+  return "";
+};
+
+const apiKey = getApiKey();
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
@@ -169,9 +181,9 @@ const content = {
           { title: "\"Were\" проти \"Was\"", text: "Коли ви поєднуєте теперішню умову з минулим результатом, застосовуйте правило другого типу: формально правильніше використовувати 'were' для всіх осіб." }
         ],
         qa: [
-          { q: "Яка основна мета змішаних умовних речень?", a: "Вони використовуються для поєднання двох різних часових періодів в одному реченні, наприклад, уявної минулої ситуації, яка має гіпотетичний теперішній результат." },
-          { q: "В реченні 'If I were rich, I would have bought that coat', до якого часу відноситься частина з 'if'?", a: "Вона відноситься до нереальної або гіпотетичної ситуації в теперішньому часі, незважаючи на те, що використовується час Past Simple." },
-          { q: "Правда чи брехня: ви можете змішувати лише минулі умови з теперішніми результатами?", a: "Брехня. Хоча це дуже поширена комбінація, ви також можете змішувати теперішні умови з минулими результатами, а також використовувати кілька інших часових комбінацій." }
+          { q: "What is the primary purpose of a mixed conditional?", a: "It is used to mix two different time periods in one sentence, such as an imaginary past situation that has a hypothetical present result." },
+          { q: "In the sentence 'If I were rich, I would have bought that coat', what time period does the 'if' clause refer to?", a: "It refers to an unreal or hypothetical situation in the present, even though it uses the past simple tense." },
+          { q: "True or False: You can only mix past conditions with present results.", a: "False. While that is a very common combination, you can also mix present conditions with past results, as well as several other time combinations." }
         ],
         staticExercises: [
           { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Past condition (didn't listen), present result (in a mess).", typeIndex: 4 },
@@ -376,7 +388,7 @@ const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "tex
 
 // --- API Service ---
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const typeInstruction = specificType === null 
     ? "Generate a random mix of all 5 types (Zero, First, Second, Third, Mixed)." 
@@ -404,6 +416,10 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
     }
   `;
 
+  if (!apiKey) {
+    throw new Error("API Key is missing! Please set REACT_APP_GEMINI_API_KEY in Vercel.");
+  }
+
   const payload = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { responseMimeType: "application/json" }
@@ -422,11 +438,16 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Gemini API Error (${response.status}):`, errorText);
-        // Stop immediately if it's an authentication or client error (no retries)
+        let errorMsg = `API Error ${response.status}: ${response.statusText}`;
+        try {
+          const errObj = JSON.parse(errorText);
+          if (errObj.error && errObj.error.message) errorMsg += ` - ${errObj.error.message}`;
+        } catch(e) {}
+        
         if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-          throw new Error(`Fatal API Error: ${response.status}`);
+          throw new Error(`Fatal ${errorMsg}`);
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(errorMsg);
       }
       
       const data = await response.json();
@@ -434,12 +455,10 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
       
       if (!text) throw new Error("Empty response from Gemini");
       
-      // Clean up any potential markdown formatting from the response
       text = text.replace(/```(json)?\n?/g, '').replace(/```\n?/g, '').trim();
-      
       return JSON.parse(text);
     } catch (error) {
-      if (error.message.includes("Fatal API Error")) throw error; // Break loop instantly
+      if (error.message.includes("Fatal")) throw error;
       if (i === delays.length - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delays[i]));
     }
@@ -447,7 +466,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
 };
 
 const askGrammarianFromGemini = async (query, history, lang) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const systemPrompt = `Role: You are an expert grammarian. Answer all questions in the context of British English. All responses should be in British English and follow British English Conventions (colour, theatre, centre, Mr, Mrs, Dr etc.). Where British and American grammar differ, tell the questioner that American English differs and offer to explain the difference. You must always provide initial explanations with reference to British English and grammar. If the user asks in Ukrainian or the current target language is Ukrainian, respond and explain in Ukrainian, but strictly reference English grammar rules and provide English examples.
 
@@ -457,7 +476,11 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
 3. Write all explanations and example sentences in PLAIN TEXT.
 4. Use **bold** ONLY for the specific grammar words you are highlighting inside a sentence (e.g., "I do not know **whether** to go").
 5. DO NOT output nested asterisks (e.g., **Sentence: **word****).
-6. DO NOT use single asterisks (*) or triple asterisks (***). Use ONLY double asterisks (**) for the targeted grammar words.`;
+6. DO NOT use single asterisks (*) or triple asterisks (***). Use double asterisks (**) for targeted grammar words.`;
+
+  if (!apiKey) {
+    throw new Error("API Key is missing! Please set REACT_APP_GEMINI_API_KEY in Vercel.");
+  }
 
   const contents = history.map(msg => ({
     role: msg.role === 'user' ? 'user' : 'model',
@@ -484,11 +507,16 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Gemini API Error (${response.status}):`, errorText);
-        // Stop immediately if it's an authentication or client error (no retries)
+        let errorMsg = `API Error ${response.status}: ${response.statusText}`;
+        try {
+          const errObj = JSON.parse(errorText);
+          if (errObj.error && errObj.error.message) errorMsg += ` - ${errObj.error.message}`;
+        } catch(e) {}
+        
         if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-          throw new Error(`Fatal API Error: ${response.status}`);
+          throw new Error(`Fatal ${errorMsg}`);
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(errorMsg);
       }
       
       const data = await response.json();
@@ -498,7 +526,7 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
       
       return text;
     } catch (error) {
-      if (error.message.includes("Fatal API Error")) throw error; // Break loop instantly
+      if (error.message.includes("Fatal")) throw error;
       if (i === delays.length - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delays[i]));
     }
@@ -746,13 +774,13 @@ export default function App() {
   
   const [labBatches, setLabBatches] = useState([]);
   const [labLoading, setLabLoading] = useState(false);
-  const [labError, setLabError] = useState(false);
+  const [labError, setLabError] = useState(null);
 
   // Grammar Guide Chat State
   const [grammarChat, setGrammarChat] = useState([]);
   const [grammarQuery, setGrammarQuery] = useState("");
   const [grammarLoading, setGrammarLoading] = useState(false);
-  const [grammarError, setGrammarError] = useState(false);
+  const [grammarError, setGrammarError] = useState(null);
   const [copiedIndex, setCopiedIndex] = useState(null);
   const chatEndRef = useRef(null);
   const latestMessageRef = useRef(null);
@@ -774,28 +802,28 @@ export default function App() {
 
   const handleGenerateTheory = async (typeIndex, typeId) => {
     setTheoryLoading(prev => ({ ...prev, [typeId]: true }));
-    setTheoryError(prev => ({ ...prev, [typeId]: false }));
+    setTheoryError(prev => ({ ...prev, [typeId]: null }));
     try {
       const results = await fetchExercisesFromGemini(5, typeIndex, lang, questionHistory);
       setTheoryExercises(prev => ({ ...prev, [typeId]: [...(prev[typeId] || []), ...results] }));
       setQuestionHistory(prev => [...prev, ...results.map(r => r.question)]);
     } catch (err) {
       console.error(err);
-      setTheoryError(prev => ({ ...prev, [typeId]: true }));
+      setTheoryError(prev => ({ ...prev, [typeId]: err.message || "An unknown error occurred" }));
     }
     setTheoryLoading(prev => ({ ...prev, [typeId]: false }));
   };
 
   const handleGenerateLab = async () => {
     setLabLoading(true);
-    setLabError(false);
+    setLabError(null);
     try {
       const results = await fetchExercisesFromGemini(10, null, lang, questionHistory);
       setLabBatches(prev => [...prev, results]);
       setQuestionHistory(prev => [...prev, ...results.map(r => r.question)]);
     } catch (err) {
       console.error(err);
-      setLabError(true);
+      setLabError(err.message || "An unknown error occurred");
     }
     setLabLoading(false);
   };
@@ -809,14 +837,14 @@ export default function App() {
     const currentQuery = grammarQuery;
     setGrammarQuery("");
     setGrammarLoading(true);
-    setGrammarError(false);
+    setGrammarError(null);
 
     try {
       const responseText = await askGrammarianFromGemini(currentQuery, grammarChat, lang);
       setGrammarChat(prev => [...prev, { role: 'model', text: responseText }]);
     } catch (err) {
       console.error(err);
-      setGrammarError(true);
+      setGrammarError(err.message || "An unknown error occurred");
       setGrammarChat(prev => prev.slice(0, -1)); 
       setGrammarQuery(currentQuery);
     }
@@ -1006,7 +1034,8 @@ export default function App() {
 
                   {theoryError[activeTheoryTab] && (
                     <div className="p-4 mb-6 rounded-lg bg-red-100 text-red-700 flex items-center gap-3 border border-red-200">
-                      <AlertTriangle className="w-5 h-5" /> <span className="font-medium">{t.error}</span>
+                      <AlertTriangle className="w-5 h-5 flex-shrink-0" /> 
+                      <span className="font-medium">{theoryError[activeTheoryTab] === true ? t.error : theoryError[activeTheoryTab]}</span>
                     </div>
                   )}
 
@@ -1060,7 +1089,7 @@ export default function App() {
               {labError && (
                 <div className="p-4 mb-6 rounded-xl bg-red-100 border border-red-200 text-red-700 flex items-center gap-3 font-medium">
                   <AlertTriangle className="w-6 h-6 flex-shrink-0" />
-                  <p>{t.error}</p>
+                  <p>{typeof labError === 'string' ? labError : t.error}</p>
                 </div>
               )}
 
@@ -1134,6 +1163,12 @@ export default function App() {
                       <span className="hidden sm:inline">{t.askButton}</span>
                     </button>
                   </form>
+                  {grammarError && (
+                    <div className="mt-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-2 text-sm font-medium animate-in fade-in">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0" /> 
+                      {typeof grammarError === 'string' ? grammarError : t.error}
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center text-slate-400 opacity-60 p-6 text-center">
                   <Bot className="w-12 h-12 sm:w-16 sm:h-16 mb-4" />
@@ -1195,6 +1230,7 @@ export default function App() {
                       </div>
                     );
                   })}
+                  <div ref={chatEndRef} />
                 </div>
 
                 <div className="p-4 sm:p-5 bg-white border-t border-slate-200 shadow-sm z-10 shrink-0">
@@ -1218,7 +1254,8 @@ export default function App() {
                   </form>
                   {grammarError && (
                     <div className="mt-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-2 text-sm font-medium animate-in fade-in">
-                      <AlertTriangle className="w-4 h-4 flex-shrink-0" /> {t.error}
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0" /> 
+                      {typeof grammarError === 'string' ? grammarError : t.error}
                     </div>
                   )}
                 </div>
