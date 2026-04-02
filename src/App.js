@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-const apiKey = process.env.REACT_APP_GEMINI_API_KEY; // Environment provided API key goes here
+// Safe access: Uses Vercel's environment variable if deployed, but prevents the "process is not defined" crash in the Canvas/browser.
+const apiKey = typeof process !== 'undefined' && process.env && process.env.REACT_APP_GEMINI_API_KEY 
+  ? process.env.REACT_APP_GEMINI_API_KEY 
+  : "";
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
