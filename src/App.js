@@ -165,8 +165,8 @@ const content = {
           "If I were rich, I would have bought that coat. (Present condition, past result)"
         ],
         nuances: [
-          { title: "Time vs. Tense", text: "Не плутайте час дієслова (tense) з реальним часом (time). Наприклад, у реченні 'If I were rich' ви використовуєте Past Simple, але насправді говорите про уявну ситуацію в теперішньому." },
-          { title: "\"Were\" проти \"Was\"", text: "Коли ви поєднуєте теперішню умову з минулим результатом, застосовуйте правило другого типу: формально правильніше використовувати 'were' для всіх осіб." }
+          { title: "Time vs. Tense", text: "A key idea to remember is not to confuse verb tense with time. For example, in the sentence 'If I were rich', you are using the past simple tense, but you are actually talking about an imaginary situation in the present." },
+          { title: "\"Were\" vs \"Was\"", text: "When making a mixed conditional that uses a present condition with a past result, apply the same rule as the second conditional. It is widely considered more formally correct to use 'were' for all subjects instead of 'was'." }
         ],
         qa: [
           { q: "What is the primary purpose of a mixed conditional?", a: "It is used to mix two different time periods in one sentence, such as an imaginary past situation that has a hypothetical present result." },
@@ -174,11 +174,11 @@ const content = {
           { q: "True or False: You can only mix past conditions with present results.", a: "False. While that is a very common combination, you can also mix present conditions with past results, as well as several other time combinations." }
         ],
         staticExercises: [
-          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Минула умова (не послухав), теперішній результат (у біді).", typeIndex: 4 },
-          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Теперішня умова (вона загалом не є хорошим водієм), минулий результат (розбила машину).", typeIndex: 4 },
-          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Минула умова, теперішній результат.", typeIndex: 4 },
-          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Теперішній результат від гіпотетичної минулої умови.", typeIndex: 4 },
-          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Теперішня умова (не розмовляє французькою), минулий результат (не переїхав).", typeIndex: 4 }
+          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Past condition (didn't listen), present result (in a mess).", typeIndex: 4 },
+          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Present condition (not a good driver generally), past result (crashed).", typeIndex: 4 },
+          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Past condition, present result.", typeIndex: 4 },
+          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Present result from a hypothetical past condition.", typeIndex: 4 },
+          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Present condition (doesn't speak French), past result (didn't move).", typeIndex: 4 }
         ]
       }
     ]
@@ -404,10 +404,6 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
     }
   `;
 
-  if (!apiKey || apiKey === "PASTE_YOUR_API_KEY_HERE") {
-    throw new Error("API Key is missing! Please paste it into Line 5 of App.js.");
-  }
-
   const payload = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { responseMimeType: "application/json" }
@@ -467,10 +463,6 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
 4. Use **bold** ONLY for the specific grammar words you are highlighting inside a sentence (e.g., "I do not know **whether** to go").
 5. DO NOT output nested asterisks (e.g., **Sentence: **word****).
 6. DO NOT use single asterisks (*) or triple asterisks (***). Use double asterisks (**) for targeted grammar words.`;
-
-  if (!apiKey || apiKey === "PASTE_YOUR_API_KEY_HERE") {
-    throw new Error("API Key is missing! Please paste it into Line 5 of App.js.");
-  }
 
   const contents = history.map(msg => ({
     role: msg.role === 'user' ? 'user' : 'model',
