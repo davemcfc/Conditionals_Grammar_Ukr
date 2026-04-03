@@ -174,11 +174,11 @@ const content = {
           { q: "True or False: You can only mix past conditions with present results.", a: "False. While that is a very common combination, you can also mix present conditions with past results, as well as several other time combinations." }
         ],
         staticExercises: [
-          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Past condition (didn't listen), present result (in a mess).", typeIndex: 4 },
-          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Present condition (not a good driver generally), past result (crashed).", typeIndex: 4 },
-          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Past condition, present result.", typeIndex: 4 },
-          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Present result from a hypothetical past condition.", typeIndex: 4 },
-          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Present condition (doesn't speak French), past result (didn't move).", typeIndex: 4 }
+          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Минула умова (не послухав), теперішній результат (у біді).", typeIndex: 4 },
+          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Теперішня умова (вона загалом не є хорошим водієм), минулий результат (розбила машину).", typeIndex: 4 },
+          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Минула умова, теперішній результат.", typeIndex: 4 },
+          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Теперішній результат від гіпотетичної минулої умови.", typeIndex: 4 },
+          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Теперішня умова (не розмовляє французькою), минулий результат (не переїхав).", typeIndex: 4 }
         ]
       }
     ]
@@ -338,7 +338,7 @@ const content = {
         formula: "Вар 1: If + past perfect, would + infinitive. | Вар 2: If + past simple, would have + past participle.",
         examples: [
           "If I had saved more money, I would own this house. (Минула умова, теперішній результат)",
-          "If I had studied German in school, my German would be better. (Минула умова, теперішній результат)",
+          "If I had studied German in school, my German would be better. (Past condition, present result)",
           "If I were rich, I would have bought that coat. (Теперішня умова, минулий результат)"
         ],
         nuances: [
@@ -346,9 +346,9 @@ const content = {
           { title: "\"Were\" проти \"Was\"", text: "Коли ви поєднуєте теперішню умову з минулим результатом, застосовуйте правило другого типу: формально правильніше використовувати 'were' для всіх осіб." }
         ],
         qa: [
-          { q: "Яка основна мета змішаних умовних речень?", a: "Вони використовуються для поєднання двох різних часових періодів в одному реченні, наприклад, уявної минулої ситуації, яка має гіпотетичний теперішній результат." },
-          { q: "В реченні 'If I were rich, I would have bought that coat', до якого часу відноситься частина з 'if'?", a: "Вона відноситься до нереальної або гіпотетичної ситуації в теперішньому часі, незважаючи на те, що використовується час Past Simple." },
-          { q: "Правда чи брехня: ви можете змішувати лише минулі умови з теперішніми результатами?", a: "Брехня. Хоча це дуже поширена комбінація, ви також можете змішувати теперішні умови з минулими результатами, а також використовувати кілька інших часових комбінацій." }
+          { q: "What is the primary purpose of a mixed conditional?", a: "It is used to mix two different time periods in one sentence, such as an imaginary past situation that has a hypothetical present result." },
+          { q: "In the sentence 'If I were rich, I would have bought that coat', what time period does the 'if' clause refer to?", a: "It refers to an unreal or hypothetical situation in the present, even though it uses the past simple tense." },
+          { q: "True or False: You can only mix past conditions with present results.", a: "False. While that is a very common combination, you can also mix present conditions with past results, as well as several other time combinations." }
         ],
         staticExercises: [
           { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Минула умова (не послухав), теперішній результат (у біді).", typeIndex: 4 },
@@ -405,8 +405,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
   `;
 
   const payload = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { responseMimeType: "application/json" }
+    contents: [{ parts: [{ text: prompt }] }]
   };
 
   const delays = [1000, 2000, 4000, 8000, 16000];
