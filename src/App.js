@@ -182,6 +182,183 @@ const content = {
         ]
       }
     ]
+  },
+  ua: {
+    title: "Умовні речення та довідник з англійської граматики",
+    navTheory: "Умовні речення",
+    navLab: "Випадкова Лабораторія",
+    navGrammar: "Граматичний Довідник",
+    grammarIntro: "Маєте запитання щодо інших аспектів британської граматики? Звертайтеся до нашого граматика за допомогою.",
+    grammarGreeting: "Привіт! Я ваш британський граматик.",
+    askPlaceholder: "Введіть ваше запитання щодо граматики тут...",
+    askButton: "Запитати",
+    copyText: "Копіювати",
+    copiedText: "Скопійовано!",
+    generateFurther: "Згенерувати ще 5 вправ",
+    generateRandom: "Згенерувати 10 випадкових вправ",
+    generateMoreRandom: "Згенерувати ще 10",
+    generating: "Генерування...",
+    revealAnswer: "Показати відповідь",
+    hideAnswer: "Сховати відповідь",
+    explanation: "Пояснення",
+    error: "Виникла помилка під час завантаження вправ. Будь ласка, спробуйте ще раз.",
+    labIntro: "Перевірте свої знання з усіх типів умовних речень. Відповіді покажуть свої справжні кольори!",
+    nuancesTitle: "Нюанси та правила",
+    qaTitle: "Питання та відповіді",
+    emptyLabState: "Натисніть кнопку генерування, щоб розпочати тест.",
+    formulaTitle: "Формула",
+    examplesTitle: "Приклади",
+    practiceTitle: "Практика",
+    qPrefix: "П: ",
+    aPrefix: "В: ",
+    types: [
+      {
+        id: 'zero',
+        navName: "Нульовий",
+        name: "Zero Conditional (Нульовий тип)",
+        colorTheme: "blue",
+        overview: "Нульовий тип є найпростішим серед умовних часів. Ми використовуємо його для обговорення загальновідомих істин, наукових фактів і речей, які завжди відбуваються за певних умов. Він описує ситуації, де конкретна умова завжди гарантує однаковий результат, незалежно від того, чи йдеться про минуле, теперішнє чи майбутнє.",
+        formula: "If + present simple, present simple (або наказовий спосіб).",
+        examples: [
+          "If you heat water, it evaporates.",
+          "If I drink coffee after 3 PM, I don't sleep at night.",
+          "Text me if you get lost."
+        ],
+        nuances: [
+          { title: "Правило коми", text: <>У всіх типах умовних речень порядок частин не є фіксованим. Якщо речення починається з частини з 'if', ви <strong>повинні</strong> використовувати кому для розділення двох частин. Якщо частина з 'if' стоїть другою, кома не потрібна.</> },
+          { title: "\"If\" проти \"When\"", text: "У нульовому типі ви зазвичай можете замінити слово 'if' на 'when' або 'whenever' без зміни змісту речення, оскільки результат є гарантованим фактом." },
+          { title: "Узагальнювальне \"You\"", text: "Коли слово 'you' використовується в реченнях нульового типу, воно часто стосується людей загалом, а не конкретної особи." }
+        ],
+        qa: [
+          { q: "Який час використовується в обох частинах умовного речення нульового типу?", a: "В обох частинах (в 'if' clause та в головній частині) використовується час Present Simple." },
+          { q: "Чи потрібна кома в реченні 'Water boils if you heat it to 100 degrees'?", a: "Ні, оскільки головна частина стоїть перед умовною ('if' clause)." },
+          { q: "Чи можна замінити 'if' іншим словом без зміни значення?", a: "Так, зазвичай його можна замінити на 'when' (коли) або 'whenever' (щоразу, коли)." }
+        ],
+        staticExercises: [
+          { question: "If you ___ (mix) red and blue, you ___ (get) purple.", answer: "If you mix red and blue, you get purple.", explanation: "Загальновідомий факт, який завжди є правдивим.", typeIndex: 0 },
+          { question: "If I ___ (eat) peanuts, I ___ (break) out in a rash.", answer: "If I eat peanuts, I break out in a rash.", explanation: "Особистий стан, який загалом є правдивим.", typeIndex: 0 },
+          { question: "Plants ___ (die) if they ___ (not get) enough water.", answer: "Plants die if they do not get enough water.", explanation: "Науковий факт.", typeIndex: 0 },
+          { question: "If you ___ (press) this button, the machine ___ (start).", answer: "If you press this button, the machine starts.", explanation: "Механічний факт або інструкція.", typeIndex: 0 },
+          { question: "Ice ___ (melt) if you ___ (heat) it.", answer: "Ice melts if you heat it.", explanation: "Науковий факт.", typeIndex: 0 }
+        ]
+      },
+      {
+        id: 'first',
+        navName: "Перший",
+        name: "First Conditional (Перший тип)",
+        colorTheme: "green",
+        overview: "Перший тип умовних речень використовується для обговорення реальних, конкретних ситуацій та речей, які мають цілком реальну ймовірність відбутися в майбутньому. На відміну від нульового типу, перший тип стосується реального світу та ймовірних майбутніх результатів.",
+        formula: "If + present simple, will (або інша форма майбутнього/модальне дієслово) + infinitive.",
+        examples: [
+          "If we don't leave now, we will miss the train.",
+          "If you study hard, you will pass the exam.",
+          "If I see my boss, I'll ask her."
+        ],
+        nuances: [
+          { title: "Модальні дієслова", text: "Ви можете замінити 'will' у головній частині модальними дієсловами ('might', 'could', 'may', 'should'), щоб виразити ступінь впевненості, рекомендацію або дозвіл." },
+          { title: "Використання \"Unless\"", text: "Слово 'unless' є дуже поширеною альтернативою для 'if... not'. Наприклад, 'Unless you get an invitation' означає 'If you don't get an invitation'." },
+          { title: "Застереження щодо \"Will\"", text: <>Дуже поширеною помилкою є вживання слова 'will' всередині умовної частини (з 'if'). Пам'ятайте: 'If it is sunny, we will go to the beach' — і <strong>ніколи</strong> 'If it will be sunny'.</> }
+        ],
+        qa: [
+          { q: "Яка правильна граматична структура для першого типу умовних речень?", a: "If + present simple, will + infinitive." },
+          { q: "Чи правильно сказати: 'If it will be sunny, we will go to the beach'?", a: "Ні, ви не повинні ставити 'will' у частині з 'if'; правильна форма: 'If it is sunny, we will go to the beach'." },
+          { q: "Яке слово є поширеною альтернативою фразі 'if...not'?", a: "'Unless' (якщо не) є дуже поширеною альтернативою." }
+        ],
+        staticExercises: [
+          { question: "If it ___ (rain) tomorrow, we ___ (cancel) the picnic.", answer: "If it rains tomorrow, we will cancel the picnic.", explanation: "Реальна можливість у майбутньому.", typeIndex: 1 },
+          { question: "If you ___ (study) hard, you ___ (pass) the exam.", answer: "If you study hard, you will pass the exam.", explanation: "Ймовірний майбутній результат.", typeIndex: 1 },
+          { question: "I ___ (call) you if I ___ (finish) work early.", answer: "I will call you if I finish work early.", explanation: "Можлива майбутня дія.", typeIndex: 1 },
+          { question: "If she ___ (not hurry), she ___ (miss) the bus.", answer: "If she does not hurry, she will miss the bus.", explanation: "Ймовірний майбутній наслідок.", typeIndex: 1 },
+          { question: "We ___ (go) to the beach if the weather ___ (be) nice.", answer: "We will go to the beach if the weather is nice.", explanation: "Плани на майбутнє, що залежать від умови.", typeIndex: 1 }
+        ]
+      },
+      {
+        id: 'second',
+        navName: "Другий",
+        name: "Second Conditional (Другий тип)",
+        colorTheme: "purple",
+        overview: "Другий тип умовних речень відходить від реальності. Ми використовуємо його, щоб говорити про уявні, неможливі, малоймовірні або гіпотетичні ситуації в теперішньому чи майбутньому, а також про їхні уявні результати. Він корисний для обговорення мрій або надання порад.",
+        formula: "If + past simple, would (або could/might) + infinitive.",
+        examples: [
+          "If I won the lottery, I would buy a house in Barbados.",
+          "If I had his number, I would call him.",
+          "If I were shorter, I would wear heels more."
+        ],
+        nuances: [
+          { title: "\"Were\" проти \"Was\"", text: "У другому типі вважається більш формально правильним використовувати 'were' для всіх осіб (наприклад, 'If I were') замість 'was', особливо коли ви даєте пораду. Проте 'was' залишається дуже поширеним у розмовній мові." },
+          { title: "Застереження щодо \"Would\"", text: <><strong>Ніколи</strong> не ставте 'would' в умову з 'if'. Неправильно казати 'If I would meet Shakira'; правильна форма — 'If I met Shakira'.</> }
+        ],
+        qa: [
+          { q: "До якого часового проміжку насправді відноситься другий тип?", a: "Він відноситься до уявних або гіпотетичних ситуацій у теперішньому або майбутньому часі." },
+          { q: "Який варіант є більш формально правильним: 'If I was you' чи 'If I were you'?", a: "'If I were you' вважається більш формально правильним, хоча 'was' дуже часто зустрічається в розмовній англійській мові." },
+          { q: "Що ми зазвичай обговорюємо, коли використовуємо другий тип?", a: "Ми використовуємо його, щоб говорити про мрії, фантазії та речі в теперішньому або майбутньому, які є неможливими або вкрай малоймовірними." }
+        ],
+        staticExercises: [
+          { question: "If I ___ (have) a million pounds, I ___ (travel) the world.", answer: "If I had a million pounds, I would travel the world.", explanation: "Уявна ситуація в теперішньому або майбутньому.", typeIndex: 2 },
+          { question: "If she ___ (know) his number, she ___ (call) him.", answer: "If she knew his number, she would call him.", explanation: "Неможлива ситуація в теперішньому (вона не знає номера).", typeIndex: 2 },
+          { question: "I ___ (buy) a big house if I ___ (win) the lottery.", answer: "I would buy a big house if I won the lottery.", explanation: "Вкрай малоймовірний сценарій у майбутньому.", typeIndex: 2 },
+          { question: "If I ___ (be) you, I ___ (not do) that.", answer: "If I were you, I would not do that.", explanation: "Надання гіпотетичної поради.", typeIndex: 2 },
+          { question: "What ___ (you/do) if you ___ (see) a ghost?", answer: "What would you do if you saw a ghost?", explanation: "Уявна, малоймовірна ситуація.", typeIndex: 2 }
+        ]
+      },
+      {
+        id: 'third',
+        navName: "Третій",
+        name: "Third Conditional (Третій тип)",
+        colorTheme: "red",
+        overview: "Третій тип умовних речень використовується виключно для розмов про минуле. Він описує гіпотетичну ситуацію, яка не відбулася в минулому, та дозволяє уявити нереальний результат. Його часто використовують для висловлення жалю або критики.",
+        formula: "If + past perfect (had + past participle), would have (або could/might have) + past participle.",
+        examples: [
+          "If I had studied harder, I would have passed the exam.",
+          "If we had left earlier, we wouldn't have arrived late.",
+          "If I had gone to bed earlier, I would have woken up in time to catch the train."
+        ],
+        nuances: [
+          { title: "Скорочення", text: "Оскільки третій тип має складну структуру, носії мови часто використовують скорочення: 'If I had known' стає 'If I'd known', а 'I would have' — 'I would've'." },
+          { title: "Узгодження підмета", text: "Слово 'have' у конструкції 'would have' ніколи не змінюється на 'has', незалежно від особи (I, you, he, she, it, we, they)." }
+        ],
+        qa: [
+          { q: "Чи описує третій тип ситуацію, яка відбулася насправді?", a: "Ні, він використовується для розповіді про ситуацію, яка не відбулася в минулому, що дозволяє нам уявити результати цього нереального сценарію." },
+          { q: "Чому мовці часто використовують скорочення на кшталт 'I’д' та 'would’ve'?", a: "Використання скорочень допомагає з вимовою, завдяки чому складна граматична структура звучить набагато природніше в розмовній англійській." }
+        ],
+        staticExercises: [
+          { question: "If I ___ (know) you were coming, I ___ (bake) a cake.", answer: "If I had known you were coming, I would have baked a cake.", explanation: "Втрачена можливість у минулому.", typeIndex: 3 },
+          { question: "We ___ (not get) wet if we ___ (take) an umbrella.", answer: "We would not have got wet if we had taken an umbrella.", explanation: "Нереальний результат у минулому.", typeIndex: 3 },
+          { question: "If she ___ (study) more, she ___ (pass) the test.", answer: "If she had studied more, she would have passed the test.", explanation: "Гіпотетична минула ситуація, яка не відбулася.", typeIndex: 3 },
+          { question: "They ___ (arrive) on time if they ___ (not miss) the train.", answer: "They would have arrived on time if they had not missed the train.", explanation: "Минулий наслідок нереальної умови.", typeIndex: 3 },
+          { question: "If I ___ (not eat) so much, I ___ (not feel) sick.", answer: "If I had not eaten so much, I would not have felt sick.", explanation: "Жаль з приводу минулої дії.", typeIndex: 3 }
+        ]
+      },
+      {
+        id: 'mixed',
+        navName: "Змішані",
+        name: "Mixed Conditionals (Змішані типи)",
+        colorTheme: "orange",
+        overview: "Змішані типи дозволяють поєднувати два різні часові проміжки в одному реченні. Вони допомагають рухатися крізь час, пов'язуючи нереальні минулі дії з гіпотетичними теперішніми результатами, або навпаки.",
+        formula: "Вар 1: If + past perfect, would + infinitive. | Вар 2: If + past simple, would have + past participle.",
+        examples: [
+          "If I had saved more money, I would own this house. (Минула умова, теперішній результат)",
+          "If I had studied German in school, my German would be better. (Минула умова, теперішній результат)",
+          "If I were rich, I would have bought that coat. (Теперішня умова, минулий результат)"
+        ],
+        nuances: [
+          { title: "Time vs. Tense", text: "Не плутайте час дієслова (tense) з реальним часом (time). Наприклад, у реченні 'If I were rich' ви використовуєте Past Simple, але насправді говорите про уявну ситуацію в теперішньому." },
+          { title: "\"Were\" проти \"Was\"", text: "Коли ви поєднуєте теперішню умову з минулим результатом, застосовуйте правило другого типу: формально правильніше використовувати 'were' для всіх осіб." }
+        ],
+        qa: [
+          { q: "Яка основна мета змішаних умовних речень?", a: "Вони використовуються для поєднання двох різних часових періодів в одному реченні, наприклад, уявної минулої ситуації, яка має гіпотетичний теперішній результат." },
+          { q: "В реченні 'If I were rich, I would have bought that coat', до якого часу відноситься частина з 'if'?", a: "Вона відноситься до нереальної або гіпотетичної ситуації в теперішньому часі, незважаючи на те, що використовується час Past Simple." },
+          { q: "Правда чи брехня: ви можете змішувати лише минулі умови з теперішніми результатами?", a: "Брехня. Хоча це дуже поширена комбінація, ви також можете змішувати теперішні умови з минулими результатами, а також використовувати кілька інших часових комбінацій." }
+        ],
+        staticExercises: [
+          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Минула умова (не послухав), теперішній результат (у біді).", typeIndex: 4 },
+          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Теперішня умова (вона загалом не є хорошим водієм), минулий результат (розбила машину).", typeIndex: 4 },
+          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Минула умова, теперішній результат.", typeIndex: 4 },
+          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Теперішній результат від гіпотетичної минулої умови.", typeIndex: 4 },
+          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Теперішня умова (не розмовляє французькою), минулий результат (не переїхав).", typeIndex: 4 }
+        ]
+      }
+    ]
   }
 };
 
@@ -199,7 +376,7 @@ const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "tex
 
 // --- API Service ---
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const typeInstruction = specificType === null 
     ? "Generate a random mix of all 5 types (Zero, First, Second, Third, Mixed)." 
@@ -226,6 +403,10 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
       "typeIndex": Number from 0 to 4 (0:Zero, 1:First, 2:Second, 3:Third, 4:Mixed)
     }
   `;
+
+  if (!apiKey) {
+    throw new Error("API Key is missing! Please ensure REACT_APP_GEMINI_API_KEY is set in Vercel.");
+  }
 
   const payload = {
     contents: [{ parts: [{ text: prompt }] }]
@@ -274,7 +455,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
 };
 
 const askGrammarianFromGemini = async (query, history, lang) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const systemPrompt = `Role: You are an expert grammarian. Answer all questions in the context of British English. All responses should be in British English and follow British English Conventions (colour, theatre, centre, Mr, Mrs, Dr etc.). Where British and American grammar differ, tell the questioner that American English differs and offer to explain the difference. You must always provide initial explanations with reference to British English and grammar. If the user asks in Ukrainian or the current target language is Ukrainian, respond and explain in Ukrainian, but strictly reference English grammar rules and provide English examples.
 
@@ -285,6 +466,10 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
 4. Use **bold** ONLY for the specific grammar words you are highlighting inside a sentence (e.g., "I do not know **whether** to go").
 5. DO NOT output nested asterisks (e.g., **Sentence: **word****).
 6. DO NOT use single asterisks (*) or triple asterisks (***). Use ONLY double asterisks (**) for the targeted grammar words.`;
+
+  if (!apiKey) {
+    throw new Error("API Key is missing! Please ensure REACT_APP_GEMINI_API_KEY is set in Vercel.");
+  }
 
   // Map local history to Gemini's expected conversational format
   const contents = history.map(msg => ({
