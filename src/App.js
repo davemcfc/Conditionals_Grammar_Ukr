@@ -4,7 +4,7 @@ import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTria
 // --- API Configuration ---
 const apiKey = process.env.REACT_APP_GEMINI_API_KEY; 
 
-// --- Content Dictionary (EN/UA) --- 
+// --- Content Dictionary (EN/UA) ---
 const content = {
   en: {
     title: "Conditionals and English Grammar Guide",
@@ -165,8 +165,8 @@ const content = {
           "If I were rich, I would have bought that coat. (Present condition, past result)"
         ],
         nuances: [
-          { title: "Time vs. Tense", text: "A key idea to remember is not to confuse verb tense with time. For example, in the sentence 'If I were rich', you are using the past simple tense, but you are actually talking about an imaginary situation in the present." },
-          { title: "\"Were\" vs \"Was\"", text: "When making a mixed conditional that uses a present condition with a past result, apply the same rule as the second conditional. It is widely considered more formally correct to use 'were' for all subjects instead of 'was'." }
+          { title: "Time vs. Tense", text: "Не плутайте час дієслова (tense) з реальним часом (time). Наприклад, у реченні 'If I were rich' ви використовуєте Past Simple, але насправді говорите про уявну ситуацію в теперішньому." },
+          { title: "\"Were\" проти \"Was\"", text: "Коли ви поєднуєте теперішню умову з минулим результатом, застосовуйте правило другого типу: формально правильніше використовувати 'were' для всіх осіб." }
         ],
         qa: [
           { q: "What is the primary purpose of a mixed conditional?", a: "It is used to mix two different time periods in one sentence, such as an imaginary past situation that has a hypothetical present result." },
@@ -174,11 +174,11 @@ const content = {
           { q: "True or False: You can only mix past conditions with present results.", a: "False. While that is a very common combination, you can also mix present conditions with past results, as well as several other time combinations." }
         ],
         staticExercises: [
-          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Past condition (didn't listen), present result (in a mess).", typeIndex: 4 },
-          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Present condition (not a good driver generally), past result (crashed).", typeIndex: 4 },
-          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Past condition, present result.", typeIndex: 4 },
-          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Present result from a hypothetical past condition.", typeIndex: 4 },
-          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Present condition (doesn't speak French), past result (didn't move).", typeIndex: 4 }
+          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Минула умова (не послухав), теперішній результат (у біді).", typeIndex: 4 },
+          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Теперішня умова (вона загалом не є хорошим водієм), минулий результат (розбила машину).", typeIndex: 4 },
+          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Минула умова, теперішній результат.", typeIndex: 4 },
+          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Теперішній результат від гіпотетичної минулої умови.", typeIndex: 4 },
+          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Теперішня умова (не розмовляє французькою), минулий результат (не переїхав).", typeIndex: 4 }
         ]
       }
     ]
@@ -376,7 +376,7 @@ const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "tex
 
 // --- API Service ---
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const typeInstruction = specificType === null 
     ? "Generate a random mix of all 5 types (Zero, First, Second, Third, Mixed)." 
@@ -452,7 +452,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
 };
 
 const askGrammarianFromGemini = async (query, history, lang) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const systemPrompt = `Role: You are an expert grammarian. Answer all questions in the context of British English. All responses should be in British English and follow British English Conventions (colour, theatre, centre, Mr, Mrs, Dr etc.). Where British and American grammar differ, tell the questioner that American English differs and offer to explain the difference. You must always provide initial explanations with reference to British English and grammar. If the user asks in Ukrainian or the current target language is Ukrainian, respond and explain in Ukrainian, but strictly reference English grammar rules and provide English examples.
 
@@ -462,13 +462,15 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
 3. Write all explanations and example sentences in PLAIN TEXT.
 4. Use **bold** ONLY for the specific grammar words you are highlighting inside a sentence (e.g., "I do not know **whether** to go").
 5. DO NOT output nested asterisks (e.g., **Sentence: **word****).
-6. DO NOT use single asterisks (*) or triple asterisks (***). Use double asterisks (**) for targeted grammar words.`;
+6. DO NOT use single asterisks (*) or triple asterisks (***). Use ONLY double asterisks (**) for the targeted grammar words.`;
 
+  // Map local history to Gemini's expected conversational format
   const contents = history.map(msg => ({
     role: msg.role === 'user' ? 'user' : 'model',
     parts: [{ text: msg.text }]
   }));
   
+  // Append current query
   contents.push({ role: 'user', parts: [{ text: query }] });
 
   const payload = {
