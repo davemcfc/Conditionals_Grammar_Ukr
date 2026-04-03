@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
-// --- API Configuration --- 
+// --- API Configuration ---
 const apiKey = process.env.REACT_APP_GEMINI_API_KEY; 
 
 // --- Content Dictionary (EN/UA) ---
@@ -319,7 +319,7 @@ const content = {
         ],
         qa: [
           { q: "Чи описує третій тип ситуацію, яка відбулася насправді?", a: "Ні, він використовується для розповіді про ситуацію, яка не відбулася в минулому, що дозволяє нам уявити результати цього нереального сценарію." },
-          { q: "Чому мовці часто використовують скорочення на кшталт 'I’д' та 'would’ve'?", a: "Використання скорочень допомагає з вимовою, завдяки чому складна граматична структура звучить набагато природніше в розмовній англійській." }
+          { q: "Чому мовці часто використовують скорочення на кшталт 'I'd' та 'would've'?", a: "Використання скорочень допомагає з вимовою, завдяки чому складна граматична структура звучить набагато природніше в розмовній англійській." }
         ],
         staticExercises: [
           { question: "If I ___ (know) you were coming, I ___ (bake) a cake.", answer: "If I had known you were coming, I would have baked a cake.", explanation: "Втрачена можливість у минулому.", typeIndex: 3 },
@@ -376,7 +376,7 @@ const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "tex
 
 // --- API Service ---
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   
   const typeInstruction = specificType === null 
     ? "Generate a random mix of all 5 types (Zero, First, Second, Third, Mixed)." 
@@ -405,8 +405,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
   `;
 
   const payload = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { responseMimeType: "application/json" }
+    contents: [{ parts: [{ text: prompt }] }]
   };
 
   const delays = [1000, 2000, 4000, 8000, 16000];
@@ -419,7 +418,20 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
         body: JSON.stringify(payload)
       });
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Gemini API Error (${response.status}):`, errorText);
+        let errorMsg = `API Error ${response.status}: ${response.statusText}`;
+        try {
+          const errObj = JSON.parse(errorText);
+          if (errObj.error && errObj.error.message) errorMsg += ` - ${errObj.error.message}`;
+        } catch(e) {}
+        
+        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          throw new Error(`Fatal ${errorMsg}`);
+        }
+        throw new Error(errorMsg);
+      }
       
       const data = await response.json();
       let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -431,6 +443,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
       
       return JSON.parse(text);
     } catch (error) {
+      if (error.message.includes("Fatal")) throw error;
       if (i === delays.length - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delays[i]));
     }
@@ -438,7 +451,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
 };
 
 const askGrammarianFromGemini = async (query, history, lang) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   
   const systemPrompt = `Role: You are an expert grammarian. Answer all questions in the context of British English. All responses should be in British English and follow British English Conventions (colour, theatre, centre, Mr, Mrs, Dr etc.). Where British and American grammar differ, tell the questioner that American English differs and offer to explain the difference. You must always provide initial explanations with reference to British English and grammar. If the user asks in Ukrainian or the current target language is Ukrainian, respond and explain in Ukrainian, but strictly reference English grammar rules and provide English examples.
 
@@ -474,7 +487,20 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
         body: JSON.stringify(payload)
       });
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Gemini API Error (${response.status}):`, errorText);
+        let errorMsg = `API Error ${response.status}: ${response.statusText}`;
+        try {
+          const errObj = JSON.parse(errorText);
+          if (errObj.error && errObj.error.message) errorMsg += ` - ${errObj.error.message}`;
+        } catch(e) {}
+        
+        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          throw new Error(`Fatal ${errorMsg}`);
+        }
+        throw new Error(errorMsg);
+      }
       
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -483,6 +509,7 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
       
       return text;
     } catch (error) {
+      if (error.message.includes("Fatal")) throw error;
       if (i === delays.length - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delays[i]));
     }
