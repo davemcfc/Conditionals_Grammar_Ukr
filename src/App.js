@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-const apiKey = AIzaSyDmW_LaKq-HnNanso7vP7tX6rM7NEUFAZo; 
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY; 
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
