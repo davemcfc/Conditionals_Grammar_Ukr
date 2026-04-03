@@ -174,11 +174,11 @@ const content = {
           { q: "True or False: You can only mix past conditions with present results.", a: "False. While that is a very common combination, you can also mix present conditions with past results, as well as several other time combinations." }
         ],
         staticExercises: [
-          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Минула умова (не послухав), теперішній результат (у біді).", typeIndex: 4 },
-          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Теперішня умова (вона загалом не є хорошим водієм), минулий результат (розбила машину).", typeIndex: 4 },
-          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Минула умова, теперішній результат.", typeIndex: 4 },
-          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Теперішній результат від гіпотетичної минулої умови.", typeIndex: 4 },
-          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Теперішня умова (не розмовляє французькою), минулий результат (не переїхав).", typeIndex: 4 }
+          { question: "If I ___ (listen) to your advice, I ___ (not be) in this mess now.", answer: "If I had listened to your advice, I would not be in this mess now.", explanation: "Past condition (didn't listen), present result (in a mess).", typeIndex: 4 },
+          { question: "If she ___ (be) a better driver, she ___ (not crash) her car yesterday.", answer: "If she were a better driver, she would not have crashed her car yesterday.", explanation: "Present condition (not a good driver generally), past result (crashed).", typeIndex: 4 },
+          { question: "If we ___ (buy) the map, we ___ (not be) lost right now.", answer: "If we had bought the map, we would not be lost right now.", explanation: "Past condition, present result.", typeIndex: 4 },
+          { question: "I ___ (have) a better job today if I ___ (go) to university.", answer: "I would have a better job today if I had gone to university.", explanation: "Present result from a hypothetical past condition.", typeIndex: 4 },
+          { question: "If he ___ (speak) French, he ___ (move) to Paris last year.", answer: "If he spoke French, he would have moved to Paris last year.", explanation: "Present condition (doesn't speak French), past result (didn't move).", typeIndex: 4 }
         ]
       }
     ]
@@ -376,7 +376,7 @@ const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "tex
 
 // --- API Service ---
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const typeInstruction = specificType === null 
     ? "Generate a random mix of all 5 types (Zero, First, Second, Third, Mixed)." 
@@ -452,7 +452,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
 };
 
 const askGrammarianFromGemini = async (query, history, lang) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const systemPrompt = `Role: You are an expert grammarian. Answer all questions in the context of British English. All responses should be in British English and follow British English Conventions (colour, theatre, centre, Mr, Mrs, Dr etc.). Where British and American grammar differ, tell the questioner that American English differs and offer to explain the difference. You must always provide initial explanations with reference to British English and grammar. If the user asks in Ukrainian or the current target language is Ukrainian, respond and explain in Ukrainian, but strictly reference English grammar rules and provide English examples.
 
