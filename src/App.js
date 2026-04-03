@@ -199,7 +199,7 @@ const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "tex
 
 // --- API Service ---
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   
   const typeInstruction = specificType === null 
     ? "Generate a random mix of all 5 types (Zero, First, Second, Third, Mixed)." 
@@ -226,10 +226,6 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
       "typeIndex": Number from 0 to 4 (0:Zero, 1:First, 2:Second, 3:Third, 4:Mixed)
     }
   `;
-
-  if (!apiKey) {
-    throw new Error("API Key is missing! Please ensure REACT_APP_GEMINI_API_KEY is set in Vercel.");
-  }
 
   const payload = {
     contents: [{ parts: [{ text: prompt }] }]
@@ -278,7 +274,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
 };
 
 const askGrammarianFromGemini = async (query, history, lang) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   
   const systemPrompt = `Role: You are an expert grammarian. Answer all questions in the context of British English. All responses should be in British English and follow British English Conventions (colour, theatre, centre, Mr, Mrs, Dr etc.). Where British and American grammar differ, tell the questioner that American English differs and offer to explain the difference. You must always provide initial explanations with reference to British English and grammar. If the user asks in Ukrainian or the current target language is Ukrainian, respond and explain in Ukrainian, but strictly reference English grammar rules and provide English examples.
 
@@ -289,10 +285,6 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
 4. Use **bold** ONLY for the specific grammar words you are highlighting inside a sentence (e.g., "I do not know **whether** to go").
 5. DO NOT output nested asterisks (e.g., **Sentence: **word****).
 6. DO NOT use single asterisks (*) or triple asterisks (***). Use ONLY double asterisks (**) for the targeted grammar words.`;
-
-  if (!apiKey) {
-    throw new Error("API Key is missing! Please ensure REACT_APP_GEMINI_API_KEY is set in Vercel.");
-  }
 
   // Map local history to Gemini's expected conversational format
   const contents = history.map(msg => ({
