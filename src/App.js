@@ -228,8 +228,7 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
   `;
 
   const payload = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { responseMimeType: "application/json" }
+    contents: [{ parts: [{ text: prompt }] }]
   };
 
   const delays = [1000, 2000, 4000, 8000, 16000];
