@@ -4,7 +4,7 @@ import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTria
 // --- API Configuration ---
 const apiKey = process.env.REACT_APP_GEMINI_API_KEY; 
 
-// --- Content Dictionary (EN/UA) ---
+// --- Content Dictionary (EN/UA) --- 
 const content = {
   en: {
     title: "Conditionals and English Grammar Guide",
