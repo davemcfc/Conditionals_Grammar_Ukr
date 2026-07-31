@@ -393,7 +393,12 @@ const typeIndexMap = ["Type 0: Zero Conditional", "Type 1: First Conditional", "
 const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "text-red-600", "text-orange-600"];
 
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+  // Fallback model hierarchy in order of preference
+  const models = [
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-2.5-flash"
+  ];
   
   const typeInstruction = specificType === null 
     ? "Generate a random mix of all 5 types (Zero, First, Second, Third, Mixed)." 
@@ -426,9 +431,11 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
     generationConfig: { responseMimeType: "application/json" }
   };
 
-  const delays = [1000, 2000, 4000, 8000, 16000];
-  
-  for (let i = 0; i < delays.length; i++) {
+  let lastError = null;
+
+  // Try each model sequentially if the primary model fails
+  for (const model of models) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -436,25 +443,33 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
         body: JSON.stringify(payload)
       });
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status} on model ${model}`);
       
       const data = await response.json();
       let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
-      if (!text) throw new Error("Empty response from Gemini");
+      if (!text) throw new Error(`Empty response from Gemini model ${model}`);
       
       text = text.replace(/```(json)?\n?/g, '').replace(/```\n?/g, '').trim();
       
       return JSON.parse(text);
     } catch (error) {
-      if (i === delays.length - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, delays[i]));
+      console.warn(`Attempt with ${model} failed, attempting next fallback...`, error);
+      lastError = error;
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
+
+  throw lastError || new Error("All model fallbacks failed.");
 };
 
 const askGrammarianFromGemini = async (query, history, lang) => {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+  // Model configurations with feature flag for 3.6 thinking configs
+  const models = [
+    { name: "gemini-3.6-flash", useThinkingConfig: true },
+    { name: "gemini-3.5-flash", useThinkingConfig: false },
+    { name: "gemini-2.5-flash", useThinkingConfig: false }
+  ];
   
   const systemPrompt = `Role: You are an expert grammarian. Answer all questions in the context of British English. All responses should be in British English and follow British English Conventions (colour, theatre, centre, Mr, Mrs, Dr etc.). Where British and American grammar differ, tell the questioner that American English differs and offer to explain the difference. You must always provide initial explanations with reference to British English and grammar. If the user asks in Ukrainian or the current target language is Ukrainian, respond and explain in Ukrainian, but strictly reference English grammar rules and provide English examples.
 
@@ -473,19 +488,23 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
   
   contents.push({ role: 'user', parts: [{ text: query }] });
 
-  const payload = {
-    systemInstruction: { parts: [{ text: systemPrompt }] },
-    contents: contents,
-    generationConfig: {
-      thinkingConfig: {
-        thinkingLevel: "MEDIUM"
-      }
-    }
-  };
+  let lastError = null;
 
-  const delays = [1000, 2000, 4000, 8000, 16000];
-  
-  for (let i = 0; i < delays.length; i++) {
+  for (const modelConfig of models) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelConfig.name}:generateContent?key=${apiKey}`;
+    
+    const payload = {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: contents,
+      ...(modelConfig.useThinkingConfig ? {
+        generationConfig: {
+          thinkingConfig: {
+            thinkingLevel: "MEDIUM"
+          }
+        }
+      } : {})
+    };
+
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -493,19 +512,22 @@ CRITICAL FORMATTING INSTRUCTIONS - YOU MUST OBEY THESE STRICTLY:
         body: JSON.stringify(payload)
       });
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status} on model ${modelConfig.name}`);
       
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
-      if (!text) throw new Error("Empty response from Gemini");
+      if (!text) throw new Error(`Empty response from Gemini model ${modelConfig.name}`);
       
       return text;
     } catch (error) {
-      if (i === delays.length - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, delays[i]));
+      console.warn(`Attempt with ${modelConfig.name} failed, attempting next fallback...`, error);
+      lastError = error;
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
+
+  throw lastError || new Error("All model fallbacks failed.");
 };
 
 const formatInlineHTML = (text) => {
