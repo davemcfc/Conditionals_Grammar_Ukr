@@ -2,7 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-const apiKey = process.env.REACT_APP_GEMINI_API_KEY; 
+const apiKey = (typeof process !== 'undefined' && process.env?.REACT_APP_GEMINI_API_KEY) 
+  || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_GEMINI_API_KEY) 
+  || ""; 
+
+// Model Cascade Hierarchy (Primary: Flash 3.7)
+const MODEL_CASCADE = [
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-2.5-flash"
+];
 
 // --- Content Dictionary (EN/UA) ---
 const content = {
@@ -319,7 +329,7 @@ const content = {
         ],
         qa: [
           { q: "Чи описує третій тип ситуацію, яка відбулася насправді?", a: "Ні, він використовується для розповіді про ситуацію, яка не відбулася в минулому, що дозволяє нам уявити результати цього нереального сценарію." },
-          { q: "Чому мовці часто використовують скорочення на кшталт 'I'd' та 'would've'?", a: "Використання скорочень допомагає з вимовою, завдяки чому складна граматична структура звучить набагато природніше в розмовній англійській." }
+          { q: "Чому носії часто використовують скорочення на кшталт 'I’д' та 'would’ве'?", a: "Використання скорочень допомагає з вимовою, завдяки чому складна граматична структура звучить набагато природніше в розмовній англійській." }
         ],
         staticExercises: [
           { question: "If I ___ (know) you were coming, I ___ (bake) a cake.", answer: "If I had known you were coming, I would have baked a cake.", explanation: "Втрачена можливість у минулому.", typeIndex: 3 },
@@ -362,7 +372,6 @@ const content = {
   }
 };
 
-// --- Theme Helper ---
 const themeStyles = {
   blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', header: 'bg-blue-100', button: 'bg-blue-600 hover:bg-blue-700', activeTab: 'bg-blue-600 text-white shadow-md', inactiveTab: 'bg-white text-blue-700 hover:bg-blue-50', bullet: 'bg-blue-500' },
   green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', header: 'bg-green-100', button: 'bg-green-600 hover:bg-green-700', activeTab: 'bg-green-600 text-white shadow-md', inactiveTab: 'bg-white text-green-700 hover:bg-blue-50', bullet: 'bg-green-500' },
@@ -374,7 +383,7 @@ const themeStyles = {
 const typeIndexMap = ["Type 0: Zero Conditional", "Type 1: First Conditional", "Type 2: Second Conditional", "Type 3: Third Conditional", "Mixed Conditional"];
 const typeColorMap = ["text-blue-600", "text-green-600", "text-purple-600", "text-red-600", "text-orange-600"];
 
-// --- API Service ---
+// --- API Service Helpers ---
 const attemptFetch = async (model, payload) => {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const response = await fetch(endpoint, {
@@ -392,13 +401,30 @@ const attemptFetch = async (model, payload) => {
       if (errObj.error && errObj.error.message) errorMsg += ` - ${errObj.error.message}`;
     } catch (e) {}
 
-    if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+    if (response.status === 403) {
       throw new Error(`Fatal ${errorMsg}`);
     }
     throw new Error(errorMsg);
   }
 
   return response.json();
+};
+
+const callGeminiCascade = async (payload) => {
+  let lastError = null;
+  for (const model of MODEL_CASCADE) {
+    try {
+      const data = await attemptFetch(model, payload);
+      return data;
+    } catch (err) {
+      if (err.message.includes("Fatal API Error 403")) {
+        throw err;
+      }
+      console.warn(`Model ${model} failed, attempting next fallback in cascade...`, err);
+      lastError = err;
+    }
+  }
+  throw lastError || new Error("All model fallbacks in cascade failed.");
 };
 
 const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
@@ -430,28 +456,23 @@ const fetchExercisesFromGemini = async (count, specificType, lang, history) => {
   `;
 
   const payload = {
-    contents: [{ parts: [{ text: prompt }] }]
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
   };
 
   const delays = [1000, 2000, 4000, 8000, 16000];
   
   for (let i = 0; i < delays.length; i++) {
     try {
-      const data = await attemptFetch('gemini-3.5-flash', payload).catch(async (e) => {
-        if (e.message.includes("Fatal")) throw e;
-        console.warn("Gemini 3.5 Flash failed, instantly dropping back to 2.5 Flash...");
-        return await attemptFetch('gemini-2.5-flash', payload);
-      });
-      
+      const data = await callGeminiCascade(payload);
       let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (!text) throw new Error("Empty response from Gemini");
       
-      // Clean up any potential markdown formatting from the response
       text = text.replace(/```(json)?\n?/g, '').replace(/```\n?/g, '').trim();
       return JSON.parse(text);
     } catch (error) {
-      if (error.message.includes("Fatal")) throw error;
+      if (error.message.includes("Fatal API Error 403")) throw error;
       if (i === delays.length - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delays[i]));
     }
@@ -473,13 +494,11 @@ const askGrammarianFromGemini = async (query, history, lang) => {
   6. DO NOT use single asterisks (*) or triple asterisks (***).
   Use ONLY double asterisks (**) for the targeted grammar words.`;
 
-  // Map local history to Gemini's expected conversational format
   const contents = history.map(msg => ({
     role: msg.role === 'user' ? 'user' : 'model',
     parts: [{ text: msg.text }]
   }));
 
-  // Append current query
   contents.push({ role: 'user', parts: [{ text: query }] });
 
   const payload = {
@@ -491,19 +510,14 @@ const askGrammarianFromGemini = async (query, history, lang) => {
   
   for (let i = 0; i < delays.length; i++) {
     try {
-      const data = await attemptFetch('gemini-3.5-flash', payload).catch(async (e) => {
-        if (e.message.includes("Fatal")) throw e;
-        console.warn("Gemini 3.5 Flash failed, instantly dropping back to 2.5 Flash...");
-        return await attemptFetch('gemini-2.5-flash', payload);
-      });
-      
+      const data = await callGeminiCascade(payload);
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (!text) throw new Error("Empty response from Gemini");
       
       return text;
     } catch (error) {
-      if (error.message.includes("Fatal")) throw error;
+      if (error.message.includes("Fatal API Error 403")) throw error;
       if (i === delays.length - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delays[i]));
     }
@@ -514,33 +528,27 @@ const askGrammarianFromGemini = async (query, history, lang) => {
 const formatInlineHTML = (text) => {
   let processedText = text;
 
-  // 1. Clean messy asterisks around labels at the start of a line (e.g. *Meaning:*, **Meaning:*, Meaning:**)
   processedText = processedText.replace(/(^|<br\s*\/?>|\n)\s*\*+([A-Z][A-Za-z0-9]*(\s+[A-Za-z0-9]+){0,3})\*+:\s*\*+/g, '$1$2: ');
   processedText = processedText.replace(/(^|<br\s*\/?>|\n)\s*\*+([A-Z][A-Za-z0-9]*(\s+[A-Za-z0-9]+){0,3}):\s*\*+/g, '$1$2: ');
   processedText = processedText.replace(/(^|<br\s*\/?>|\n)\s*([A-Z][A-Za-z0-9]*(\s+[A-Za-z0-9]+){0,3})\*+:\s*\*+/g, '$1$2: ');
 
-  // 2. Auto-bold all short labels to ensure absolute consistency
   processedText = processedText.replace(/(^|<br\s*\/?>|\n)\s*([A-Z][A-Za-z0-9]*(\s+[A-Za-z0-9]+){0,3}):\s/g, '$1**$2:** ');
 
-  // 3. The Unwrapper: Remove outer bold from whole sentences that cause inversion
-  // Detects the pattern: **(text)**(target word)**(text)** and unwraps the outer layer
   processedText = processedText.replace(/\*\*([^\*]+)\*\*([^\*]+)\*\*([^\*]+)\*\*/g, function(match, p1, p2, p3) {
-    if (p2.trim().length === 0) return match; // Skip if the middle part is just space
-    if (p1.trim().endsWith(':') || p3.trim().endsWith(':')) return match; // Skip if it involves a label
+    if (p2.trim().length === 0) return match; 
+    if (p1.trim().endsWith(':') || p3.trim().endsWith(':')) return match; 
     if (p1.length > 3 || p3.length > 3) {
-        return p1 + '**' + p2 + '**' + p3; // Unwrap the outer bold!
+        return p1 + '**' + p2 + '**' + p3; 
     }
     return match;
   });
 
-  // 4. Standard Markdown replacements
   let html = processedText
     .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '<strong class="font-bold text-slate-900 italic">$1</strong>')
     .replace(/\*\*([\s\S]+?)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>')
     .replace(/\*([\s\S]+?)\*/g, '<em class="italic text-slate-800">$1</em>')
     .replace(/`([\s\S]+?)`/g, '<code class="bg-blue-50 text-blue-700 border border-blue-100 px-1.5 py-0.5 rounded text-[0.9em] font-mono">$1</code>');
 
-  // 5. The Nuclear Option: Eradicate any surviving rogue asterisks
   html = html.replace(/\*/g, '');
   
   return html;
@@ -549,17 +557,12 @@ const formatInlineHTML = (text) => {
 const formatMarkdown = (text) => {
   if (!text) return null;
 
-  // Clean up any stray trailing asterisks at the very end of the response
   let cleanText = text.trim().replace(/\*+$/, '').trim();
-
-  // Split the response into logical blocks separated by double newlines
   const blocks = cleanText.split(/\n{2,}/);
 
   return blocks.map((block, bIdx) => {
-    // Strip errant asterisks from the end of individual blocks just in case
     block = block.replace(/\*+$/, '').trim();
 
-    // 1. Headings
     const hMatch = block.match(/^(#{1,6})\s+(.*)/);
     if (hMatch) {
       const level = hMatch[1].length;
@@ -570,15 +573,11 @@ const formatMarkdown = (text) => {
       return React.createElement(Tag, { key: bIdx, className: classes, dangerouslySetInnerHTML: { __html: formatInlineHTML(hMatch[2]) } });
     }
     
-    // Split block into lines to check for lists and tables
     const lines = block.split('\n').map(l => l.trim()).filter(l => l);
     const isUnorderedList = lines.every(line => /^[\-\*]\s+/.test(line));
     const isOrderedList = lines.every(line => /^\d+\.\s+/.test(line));
-    
-    // Check if the block is a Markdown Table (Line 0 has pipes, Line 1 is the separator with hyphens and pipes)
     const isTable = lines.length >= 2 && lines[0].includes('|') && lines[1].includes('|') && lines[1].includes('-');
 
-    // 2. Unordered Lists
     if (isUnorderedList) {
       return (
         <ul key={bIdx} className="list-disc pl-6 mb-4 space-y-2 text-slate-700">
@@ -589,7 +588,6 @@ const formatMarkdown = (text) => {
       );
     }
 
-    // 3. Ordered Lists
     if (isOrderedList) {
       return (
         <ol key={bIdx} className="list-decimal pl-6 mb-4 space-y-2 text-slate-700">
@@ -600,16 +598,14 @@ const formatMarkdown = (text) => {
       );
     }
     
-    // 4. Tables
     if (isTable) {
       const parseRow = (line) => {
-        // Remove leading and trailing pipes so we don't get empty cells at the edges
         const cleanedLine = line.replace(/^\|/, '').replace(/\|$/, '');
         return cleanedLine.split('|').map(cell => cell.trim());
       };
 
       const headers = parseRow(lines[0]);
-      const rows = lines.slice(2).map(parseRow); // Skip line 1 (the separator)
+      const rows = lines.slice(2).map(parseRow);
 
       return (
         <div key={bIdx} className="overflow-x-auto mb-5 rounded-lg border border-slate-200">
@@ -635,7 +631,6 @@ const formatMarkdown = (text) => {
       );
     }
 
-    // 5. Standard Paragraphs (Convert single newlines to distinct block elements instead of <br/>)
     const paragraphLines = block.split('\n');
     return (
       <div key={bIdx} className="mb-4 last:mb-0 text-slate-700 leading-relaxed space-y-2">
@@ -652,7 +647,6 @@ const formatMarkdown = (text) => {
 const ExerciseItem = ({ item, isLab }) => {
   const [revealed, setRevealed] = useState(false);
 
-  // Split the question by 2 or more underscores to insert inputs
   const parts = item.question.split(/_{2,}/);
   const [userAnswers, setUserAnswers] = useState(Array(Math.max(0, parts.length - 1)).fill(""));
   const [fallbackAnswer, setFallbackAnswer] = useState("");
@@ -669,7 +663,6 @@ const ExerciseItem = ({ item, isLab }) => {
 
   return (
     <div className={`p-4 border rounded-xl shadow-sm mb-4 transition-all duration-300 ${baseBg}`}>
-      {/* Question remains visible, now with interactive gaps */}
       <div className={`font-medium text-lg mb-2 leading-relaxed ${textQuestionColor} ${revealed ? 'opacity-60' : ''}`}>
         {parts.length > 1 ? (
           parts.map((part, index) => (
@@ -706,7 +699,6 @@ const ExerciseItem = ({ item, isLab }) => {
         )}
       </div>
        
-      {/* Answer and Explanation drop down below the question */}
       {revealed && (
         <div className={`mt-4 pt-4 border-t ${isLab ? 'border-[#D2B48C]/40' : 'border-gray-200'} animate-in fade-in slide-in-from-top-2 duration-300`}>
           <p className={`font-bold text-xl mb-4 ${textAnswerColor}`}>
@@ -744,7 +736,6 @@ export default function App() {
   const [activeTheoryTab, setActiveTheoryTab] = useState('zero');
   const [questionHistory, setQuestionHistory] = useState([]);
   
-  // Section states
   const [theoryExercises, setTheoryExercises] = useState({});
   const [theoryLoading, setTheoryLoading] = useState({});
   const [theoryError, setTheoryError] = useState({});
@@ -753,7 +744,6 @@ export default function App() {
   const [labLoading, setLabLoading] = useState(false);
   const [labError, setLabError] = useState(null);
 
-  // Grammar Guide Chat State
   const [grammarChat, setGrammarChat] = useState([]);
   const [grammarQuery, setGrammarQuery] = useState("");
   const [grammarLoading, setGrammarLoading] = useState(false);
@@ -762,11 +752,9 @@ export default function App() {
   const chatEndRef = useRef(null);
   const latestMessageRef = useRef(null);
 
-  // Focus logic: Scroll to the start of the response/question when it arrives
   useEffect(() => {
     if (activeMainTab === 'grammar' && grammarChat.length > 0) {
       const lastMsg = grammarChat[grammarChat.length - 1];
-      // If a response has just arrived, or if we just sent a question
       if (lastMsg.role === 'model' || lastMsg.role === 'user') {
         latestMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -829,27 +817,25 @@ export default function App() {
   };
 
   const handleCopy = async (text, index) => {
-    // Strip markdown formatting for a clean plain-text copy
     const cleanText = text
-      .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '$1') // Remove bold italic
-      .replace(/\*\*([\s\S]+?)\*\*/g, '$1') // Remove bold
-      .replace(/\*([\s\S]+?)\*/g, '$1') // Remove italic
-      .replace(/`([\s\S]+?)`/g, '$1') // Remove code syntax
-      .replace(/^(#{1,6})\s+(.*)/gm, '$2') // Remove heading hashes
-      .replace(/\*/g, ''); // The Nuclear Option: eradicate all remaining stray asterisks
+      .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '$1')
+      .replace(/\*\*([\s\S]+?)\*\*/g, '$1')
+      .replace(/\*([\s\S]+?)\*/g, '$1')
+      .replace(/`([\s\S]+?)`/g, '$1')
+      .replace(/^(#{1,6})\s+(.*)/gm, '$2')
+      .replace(/\*/g, '');
 
     try {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(cleanText);
         setCopiedIndex(index);
         setTimeout(() => setCopiedIndex(null), 2000);
-        return; // Exit early if successful
+        return;
       }
     } catch (err) {
       console.warn('Modern clipboard API failed, using fallback', err);
     }
 
-    // Fallback for older browsers or restricted environments
     const textArea = document.createElement("textarea");
     textArea.value = cleanText;
     textArea.style.position = "absolute";
@@ -868,7 +854,6 @@ export default function App() {
     document.body.removeChild(textArea);
   };
 
-  // Group the chat into Q&A pairs (Chronological order)
   const chatPairs = [];
   for (let i = 0; i < grammarChat.length; i += 2) {
     chatPairs.push({
@@ -1150,7 +1135,6 @@ export default function App() {
               <>
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 bg-slate-50/50">
                   {chatPairs.map((pair, idx) => {
-                    // We target the current/latest interaction for auto-scroll focus
                     const isLatest = idx === chatPairs.length - 1;
                     return (
                       <div key={idx} ref={isLatest ? latestMessageRef : null} className="flex flex-col gap-4 sm:gap-5 animate-in slide-in-from-bottom-4 fade-in duration-500">
