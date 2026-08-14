@@ -2,12 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, RefreshCw, Eye, EyeOff, Globe, Beaker, CheckCircle, AlertTriangle, Info, HelpCircle, MessageCircle, Send, User, Bot, Copy, Check } from 'lucide-react';
 
 // --- API Configuration ---
-// Supports Create React App (REACT_APP_), Next.js (NEXT_PUBLIC_), and Vite (VITE_)
-const apiKey = 
-  (typeof process !== 'undefined' && process.env?.REACT_APP_GEMINI_API_KEY) ||
-  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_GEMINI_API_KEY) ||
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) ||
-  "";
+// Standard static access for Webpack / Create React App bundle replacement
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
 
 // Model Cascade Hierarchy (Primary: Flash 3.7)
 const MODEL_CASCADE = [
