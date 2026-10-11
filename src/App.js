@@ -9,7 +9,6 @@ const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
 const MODEL_CASCADE = [
   "gemini-3.8-flash",
   "gemini-3.6-flash",
-  "gemini-3.5-flash",
   "gemini-2.5-flash"
 ];
 
