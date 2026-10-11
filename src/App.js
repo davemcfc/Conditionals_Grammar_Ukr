@@ -7,7 +7,7 @@ const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
 
 // Model Cascade Hierarchy (Primary: Flash 3.7)
 const MODEL_CASCADE = [
-  "gemini-3.7-flash",
+  "gemini-3.8-flash",
   "gemini-3.6-flash",
   "gemini-3.5-flash",
   "gemini-2.5-flash"
