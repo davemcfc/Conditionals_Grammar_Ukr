@@ -730,7 +730,7 @@ const ExerciseItem = ({ item, isLab }) => {
 
 export default function App() {
   const [lang, setLang] = useState('en');
-  const [activeMainTab, setActiveMainTab] = useState('theory');
+  const [activeMainTab, setActiveMainTab] = useState('grammar');
   const [activeTheoryTab, setActiveTheoryTab] = useState('zero');
   const [questionHistory, setQuestionHistory] = useState([]);
   
